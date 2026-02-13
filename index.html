@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE Multi-Sender Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>🟢 LINE Sender Pro</h1>
+
+        <div class="token-manager">
+            <div class="grid-config">
+                <div class="form-group">
+                    <label>เลือกบัญชีที่บันทึกไว้</label>
+                    <select id="tokenSelect" onchange="loadSelectedToken()">
+                        <option value="">-- เลือกบัญชี --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ชื่อเรียกบัญชี (เช่น ฝ่ายขาย)</label>
+                    <input type="text" id="tokenName" placeholder="ตั้งชื่อเพื่อบันทึก">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Channel Access Token</label>
+                <input type="password" id="token" placeholder="วาง Access Token">
+            </div>
+            <button class="btn-save" onclick="saveToken()">💾 บันทึก Token นี้ลงเครื่อง</button>
+            <button class="btn-save" style="background:#ef4444" onclick="clearTokens()">🗑️ ล้างทั้งหมด</button>
+        </div>
+
+        <div class="form-group">
+            <label>User IDs ผู้รับ (บรรทัดละ 1 ID)</label>
+            <textarea id="userIds" rows="5" placeholder="U123..."></textarea>
+        </div>
+
+        <div id="message-area">
+            <script>
+                for(let i=1; i<=5; i++) {
+                    document.write(`
+                        <div class="message-box">
+                            <div class="box-header">
+                                <span style="font-weight:500; color:#64748b">ส่วนที่ ${i}</span>
+                                <select id="type-${i}" style="width:auto; padding:4px">
+                                    <option value="text">ข้อความ</option>
+                                    <option value="image">รูปภาพ (URL)</option>
+                                </select>
+                            </div>
+                            <textarea id="val-${i}" rows="2" placeholder="ใส่ข้อความหรือ Link รูปภาพ..."></textarea>
+                        </div>
+                    `);
+                }
+            </script>
+        </div>
+
+        <button onclick="processAndSend()" id="sendBtn" class="btn-send">🚀 ส่งข้อความ (Multicast)</button>
+    </div>
+
+    <script>
+        const GAS_URL = "วาง_URL_APPS_SCRIPT_ที่นี่";
+
+        // --- ระบบจัดการ Token ---
+        let savedTokens = JSON.parse(localStorage.getItem('vafper_tokens') || '{}');
+
+        function updateDropdown() {
+            const select = document.getElementById('tokenSelect');
+            select.innerHTML = '<option value="">-- เลือกบัญชี --</option>';
+            for (let name in savedTokens) {
+                let opt = document.createElement('option');
+                opt.value = name;
+                opt.innerHTML = name;
+                select.appendChild(opt);
+            }
+        }
+
+        function saveToken() {
+            const name = document.getElementById('tokenName').value;
+            const token = document.getElementById('token').value;
+            if(!name || !token) return alert("กรุณากรอกทั้งชื่อและ Token ครับ");
+            
+            savedTokens[name] = token;
+            localStorage.setItem('vafper_tokens', JSON.stringify(savedTokens));
+            updateDropdown();
+            alert("บันทึกสำเร็จ!");
+        }
+
+        function loadSelectedToken() {
+            const name = document.getElementById('tokenSelect').value;
+            if(name) {
+                document.getElementById('tokenName').value = name;
+                document.getElementById('token').value = savedTokens[name];
+            }
+        }
+
+        function clearTokens() {
+            if(confirm("ต้องการลบบัญชีที่บันทึกไว้ทั้งหมดใช่ไหม?")) {
+                localStorage.removeItem('vafper_tokens');
+                savedTokens = {};
+                updateDropdown();
+                document.getElementById('token').value = "";
+                document.getElementById('tokenName').value = "";
+            }
+        }
+
+        // --- ระบบส่งข้อความ ---
+        async function processAndSend() {
+            const btn = document.getElementById('sendBtn');
+            const token = document.getElementById('token').value;
+            const userIdsRaw = document.getElementById('userIds').value.trim();
+            
+            if(!token || !userIdsRaw) return alert("กรอกข้อมูลให้ครบก่อนนะครับว๊าฟ!");
+
+            const userIds = userIdsRaw.split('\n').map(id => id.trim()).filter(id => id !== "");
+            let messages = [];
+
+            for(let i=1; i<=5; i++) {
+                const type = document.getElementById(`type-${i}`).value;
+                const val = document.getElementById(`val-${i}`).value.trim();
+                if(val) {
+                    if(type === 'text') {
+                        messages.push({ type: "text", text: val });
+                    } else {
+                        messages.push({ type: "image", originalContentUrl: val, previewImageUrl: val });
+                    }
+                }
+            }
+
+            if(messages.length === 0) return alert("ต้องมีข้อความอย่างน้อย 1 ช่องนะ");
+
+            btn.disabled = true;
+            btn.innerText = "กำลังส่ง...";
+
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ token, userIds, messages })
+                });
+                alert("ส่งเรียบร้อยแล้ว! อย่าลืมเช็คใน LINE นะครับ");
+            } catch (err) {
+                alert("เกิดข้อผิดพลาด: " + err);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "🚀 ส่งข้อความ (Multicast)";
+            }
+        }
+
+        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        updateDropdown();
+    </script>
+</body>
+</html>

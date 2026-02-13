@@ -1,0 +1,128 @@
+:root {
+    --line-green: #06C755;
+    --dark-slate: #1e293b;
+    --light-bg: #f8fafc;
+}
+
+body {
+    font-family: 'Kanit', sans-serif; /* แนะนำให้เพิ่ม font นี้ใน html */
+    background-color: var(--light-bg);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    color: var(--dark-slate);
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    color: var(--line-green);
+}
+
+/* Responsive Grid */
+.grid-config {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 600px) {
+    .grid-config {
+        grid-template-columns: 1fr;
+    }
+    .container {
+        padding: 15px;
+        margin: 10px;
+    }
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+input:focus, textarea:focus {
+    border-color: var(--line-green);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.1);
+}
+
+/* Token Manager Section */
+.token-manager {
+    background: #f1f5f9;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+}
+
+.message-box {
+    background: #ffffff;
+    padding: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.btn-send {
+    width: 100%;
+    padding: 16px;
+    background-color: var(--line-green);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2);
+}
+
+.btn-send:active {
+    transform: scale(0.98);
+}
+
+.btn-save {
+    background: #64748b;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: none;
+    margin-top: 10px;
+}
